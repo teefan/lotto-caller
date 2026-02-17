@@ -1,4 +1,5 @@
-const CACHE_NAME = "lotto-v1";
+const APP_VERSION = "0.0.1";
+const CACHE_NAME = `lotto-v${APP_VERSION}`;
 const ASSETS = [
   "./",
   "./index.html",
@@ -14,9 +15,28 @@ const ASSETS = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
-    }),
+    caches
+      .open(CACHE_NAME)
+      .then((cache) => {
+        return cache.addAll(ASSETS);
+      })
+      .then(() => self.skipWaiting()),
+  );
+});
+
+self.addEventListener("activate", (event) => {
+  // Remove old caches when a new SW with a different CACHE_NAME is activated
+  event.waitUntil(
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(
+          keys.map((key) => {
+            if (key !== CACHE_NAME) return caches.delete(key);
+          }),
+        ),
+      )
+      .then(() => self.clients.claim()),
   );
 });
 

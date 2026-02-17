@@ -1,4 +1,5 @@
 // --- Configuration ---
+const APP_VERSION = "0.0.1";
 let TOTAL_NUMBERS = 90;
 const SHUFFLE_DURATION_MS = 2500; // Slower for more suspense
 const SHUFFLE_SPEED_MS = 80; // Slightly slower flickers
@@ -209,6 +210,10 @@ function init() {
   ballFrontEl.textContent = "--";
   // Ensure front is visible at start
   flipperEl.classList.remove("flipped");
+
+  // Show app version (for cache-busting visibility)
+  const versionEl = document.getElementById("app-version");
+  if (versionEl) versionEl.textContent = `v${APP_VERSION}`;
 
   drawBtn.disabled = false;
   drawBtn.innerHTML = "<span>🎲</span> Quay Số"; // Restore button text if it was "HẾT SỐ"
@@ -450,7 +455,7 @@ if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker
       .register("./service-worker.js")
-      .then((reg) => console.log("Service Worker registered"))
+      .then((reg) => console.log(`Service Worker registered (v${APP_VERSION})`))
       .catch((err) => console.log("Service Worker registration failed:", err));
   });
 }
