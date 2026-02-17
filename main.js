@@ -16,7 +16,46 @@ const introPhrases = [
   "Dò xem, dò xem! Một con số mang lại tài lộc...",
   "Bà con chú ý, con số định mệnh sắp xuất hiện!",
   "Vé đâu vé đâu? Chuẩn bị gạch tên con số này nè!",
+  "Gió đưa cành trúc la đà, ai mà trúng số chắc là đại gia!",
 ];
+
+const reactionSets = {
+  // Direct questions / crowd prompts
+  question: ["Có ai trúng chưa ạ? Ai trúng thì la lên cho bà con mừng coi!"],
+  // Praise / celebration
+  praise: ["Trời ơi số đẹp quá, không trúng nữa thì thôi luôn đó!", "Mừng cho ai sở hữu con số này, lộc về lộc về!"],
+  // Teasing / playful
+  tease: [
+    "Anh chị nào có số này chắc đang cười thầm trong bụng hả?",
+    "Kêu nãy giờ mới chịu ra, làm cả nhà chờ muốn xỉu!",
+  ],
+  // Suspense / delayed number comment
+  suspense: [
+    "Kinh khủng chưa, con số này nãy giờ trốn kỹ quá giờ mới ra!",
+    "Nín thở đi, con số này xuất hiện muộn mà chất lắm!",
+  ],
+  // Reminder / cautionary
+  caution: [
+    "Dò kỹ nha, đừng để lọt lưới con cá mập này nha quý vị!",
+    "Còn nhiều số lắm, ai chưa có thì bình tĩnh, vận may đang đến!",
+  ],
+  // Generic fallback pool
+  generic: [
+    "Có ai trúng chưa ạ? Ai trúng thì la lên cho bà con mừng coi!",
+    "Trời ơi số đẹp quá, không trúng nữa thì thôi luôn đó!",
+    "Anh chị nào có số này chắc đang cười thầm trong bụng hả?",
+    "Kinh khủng chưa, con số này nãy giờ trốn kỹ quá giờ mới ra!",
+    "Dò kỹ nha, đừng để lọt lưới con cá mập này nha quý vị!",
+    "Mừng cho ai sở hữu con số này, lộc về lộc về!",
+    "Còn nhiều số lắm, ai chưa có thì bình tĩnh, vận may đang đến!",
+    "Kêu nãy giờ mới chịu ra, làm cả nhà chờ muốn xỉu!",
+  ],
+};
+
+// Utility to pick a random element
+function pick(array) {
+  return array[Math.floor(Math.random() * array.length)];
+}
 
 // --- State ---
 let availableNumbers = [];
@@ -72,8 +111,9 @@ setTimeout(loadVoices, 500);
 
 // Function to speak with "Happy/Excited" parameters
 function speakHappy(text, callback) {
-  if (!isSoundOn) {
-    if (callback) setTimeout(callback, 500); // Trigger callback faster if muted
+  // If muted or TTS unavailable, trigger callback quickly
+  if (!isSoundOn || !window.speechSynthesis) {
+    if (callback) setTimeout(callback, 800);
     return;
   }
 
@@ -104,16 +144,41 @@ function speakHappy(text, callback) {
   window.speechSynthesis.speak(utterance);
 }
 
+// Helper: convert number to Vietnamese "call" string (e.g. "mười sáu", "tám mươi hai")
+function numberToCall(number) {
+  const words = ["không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"];
+  if (number < 10) return words[number];
+
+  const tens = Math.floor(number / 10);
+  const units = number % 10;
+
+  if (tens === 1) {
+    if (units === 0) return "mười";
+    if (units === 1) return "mười một";
+    if (units === 5) return "mười lăm";
+    return `mười ${words[units]}`;
+  }
+
+  const tensWord = words[tens];
+  if (units === 0) return `${tensWord} mươi`;
+
+  let unitsWord = words[units];
+  if (units === 1) unitsWord = "mốt";
+  if (units === 5) unitsWord = "lăm";
+
+  return `${tensWord} mươi ${unitsWord}`;
+}
+
 // Special function to call the number in "Lotto Style"
 function callNumber(number, callback) {
-  if (!isSoundOn) {
-    if (callback) setTimeout(callback, 1000);
+  if (!isSoundOn || !window.speechSynthesis) {
+    if (callback) setTimeout(callback, 1200); // Artificial delay to simulate suspense when muted
     return;
   }
 
-  // Vietnamese lotto caller style often repeats the digits or the whole number
-  // e.g., "Con số 8, số 8" or "8 mươi 2, 8 mươi 2"
-  const text = `Số ${number}. ${number}!`;
+  const call = numberToCall(number);
+  const text = number < 10 ? `Con số ${call}, là con số ${call}` : `Số ${call}, là con số ${call}!`;
+
   speakHappy(text, callback);
 }
 
@@ -249,45 +314,109 @@ function drawNumber() {
   }, SHUFFLE_DURATION_MS + 500); // Extended for the ticker logic
 }
 
+function chooseReaction(winner) {
+  const call = numberToCall(winner);
+  const remaining = availableNumbers.length; // after the splice in revealWinner
+  const drawnCount = drawnNumbers.length;
+  const tens = Math.floor(winner / 10);
+  const units = winner % 10;
+
+  const candidates = [];
+
+  // Context-aware selections (use specific templates + category snippets)
+  if (drawnCount === 1) {
+    candidates.push(`Mở màn với con số ${call}! Bắt đầu rồi bà con ơi!`);
+    candidates.push(pick(reactionSets.question));
+  }
+
+  if (remaining === 0) {
+    candidates.push(`Số cuối rồi: ${call}. Hết ván!`);
+    candidates.push(pick(reactionSets.praise));
+  }
+
+  if (winner < 10) {
+    candidates.push(`Số nhỏ xinh: ${call}. Ai có thì giơ tay!`);
+    candidates.push(pick(reactionSets.tease));
+  }
+
+  if (units === 0) {
+    candidates.push(`Số tròn chục: ${call}. Dễ nhớ quá!`);
+    candidates.push(pick(reactionSets.praise));
+  }
+
+  if (tens === units && winner >= 11) {
+    candidates.push(`Số kép: ${call}! Ai có số kép là mừng rồi!`);
+    candidates.push(pick(reactionSets.praise));
+  }
+
+  if (units === 5) {
+    candidates.push(`Có lăm nè: ${call}. May mắn lắm!`);
+    candidates.push(pick(reactionSets.praise));
+  }
+
+  if (remaining > 0 && remaining <= 5) {
+    candidates.push(`Còn ${remaining} con nữa thôi, giữ vé kỹ nha!`);
+    candidates.push(pick(reactionSets.caution));
+  }
+
+  // If we have strong contextual candidates, return one
+  if (candidates.length > 0) return pick(candidates);
+
+  // Occasional generic fallback that still references the called number
+  if (Math.random() < 0.5) return `${pick(reactionSets.generic)} — ${call}`;
+
+  return null;
+}
+
 function revealWinner(winner, indexToRemove) {
-  // 4. THE REVEAL (Flip back to Front)
-  flipperEl.classList.remove("flipped");
+  // 4. THE REVEAL Logic
+  // We keep it flipped (showing ?) while the MC announces the number
 
   // Call the Number in Lotto Style
-  callNumber(winner);
+  callNumber(winner, () => {
+    // OPEN THE BALL AFTER ANNOUNCEMENT
+    flipperEl.classList.remove("flipped");
 
-  // Logic Update
-  availableNumbers.splice(indexToRemove, 1);
-  drawnNumbers.push(winner);
-  countEl.textContent = drawnNumbers.length;
+    // Logic Update - Move here so it only updates UI when revealed
+    availableNumbers.splice(indexToRemove, 1);
+    drawnNumbers.push(winner);
+    countEl.textContent = drawnNumbers.length;
 
-  // Highlight Grid
-  const gridBall = document.getElementById(`ball-${winner}`);
-  if (gridBall) gridBall.classList.add("active");
+    // Highlight Grid - Only after reveal
+    const gridBall = document.getElementById(`ball-${winner}`);
+    if (gridBall) gridBall.classList.add("active");
 
-  // 5. Cleanup / Next Step
-  // Wait a moment for speech to finish before enabling next button or auto-play
-  setTimeout(() => {
-    isAnimating = false;
-
-    if (availableNumbers.length === 0) {
-      drawBtn.disabled = true;
-      drawBtn.innerHTML = "HẾT SỐ";
-      stopAutoPlay();
-      speakHappy("Hết số rồi! Xin cảm ơn.");
-    } else {
-      drawBtn.disabled = false;
-      // Trigger next auto draw?
-      if (isAutoPlaying) {
-        autoPlayTimer = setTimeout(
-          () => {
-            if (isAutoPlaying) drawNumber();
-          },
-          autoDelaySeconds * 1000 - 2000,
-        ); // Adjust for animation time
-      }
+    // Context-aware reaction (may return null to skip)
+    const reaction = chooseReaction(winner);
+    if (reaction) {
+      setTimeout(() => {
+        mcDisplayEl.textContent = reaction;
+        speakHappy(reaction);
+      }, 800);
     }
-  }, 1500);
+
+    // 5. Cleanup / Next Step - Triggered after reveal
+    setTimeout(() => {
+      isAnimating = false;
+
+      if (availableNumbers.length === 0) {
+        drawBtn.disabled = true;
+        drawBtn.innerHTML = "HẾT SỐ";
+        stopAutoPlay();
+        speakHappy("Hết số rồi! Xin cảm ơn.");
+      } else {
+        drawBtn.disabled = false;
+        if (isAutoPlaying) {
+          autoPlayTimer = setTimeout(
+            () => {
+              if (isAutoPlaying) drawNumber();
+            },
+            autoDelaySeconds * 1000 - 3000,
+          );
+        }
+      }
+    }, 1000);
+  });
 }
 
 function resetGame() {
