@@ -1,5 +1,5 @@
 // --- Configuration ---
-const APP_VERSION = "0.0.1";
+const APP_VERSION = "0.0.2";
 let TOTAL_NUMBERS = 90;
 const SHUFFLE_DURATION_MS = 2500; // Slower for more suspense
 const SHUFFLE_SPEED_MS = 80; // Slightly slower flickers
