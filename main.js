@@ -79,6 +79,7 @@ function speakHappy(text, callback) {
 
   // Use a fresh utterance to avoid queuing issues
   const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "vi-VN"; // Explicitly set language for consistency
   if (selectedVoice) utterance.voice = selectedVoice;
 
   // HAPPY SETTINGS:
