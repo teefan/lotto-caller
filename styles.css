@@ -1,0 +1,390 @@
+:root {
+  --bg-color: #1a0b2e;
+  --panel-color: #2d1b4e;
+  --accent-gold: #ffd700;
+  --accent-glow: #ffea00;
+  --accent-red: #ff4757;
+  --text-color: #ffffff;
+  --ball-dim: #432c7a;
+  --success-green: #2ecc71;
+}
+
+body {
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-color);
+  background-image: radial-gradient(circle at 50% 0%, #4f2d7f 0%, var(--bg-color) 70%);
+  color: var(--text-color);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  user-select: none;
+  overflow-x: hidden;
+}
+
+/* --- Header --- */
+header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+h1 {
+  font-weight: 900;
+  text-transform: uppercase;
+  margin: 0;
+  text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+  color: var(--accent-gold);
+  font-size: 2.5rem;
+}
+.subtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-style: italic;
+  margin-top: 5px;
+}
+
+/* --- Game Mode Selector --- */
+.game-mode-selector {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.mode-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  min-width: 80px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.mode-btn.active {
+  background: var(--accent-gold);
+  color: var(--bg-color);
+  box-shadow: 0 0 10px var(--accent-gold);
+}
+
+/* --- Controls --- */
+.controls-area {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 15px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+  width: 100%;
+  max-width: 500px;
+  z-index: 10;
+}
+
+.main-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+button {
+  padding: 12px 24px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: bold;
+  text-transform: uppercase;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+#draw-btn {
+  background: linear-gradient(135deg, #ffd700, #ff8c00);
+  color: #1a0b2e;
+  min-width: 140px;
+}
+#draw-btn:disabled {
+  background: #555;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+#reset-btn {
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+}
+#reset-btn:hover {
+  border-color: var(--accent-red);
+  color: var(--accent-red);
+}
+
+/* Auto Play Styles */
+.auto-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px 20px;
+  border-radius: 30px;
+  width: 100%;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.toggle-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.switch-input {
+  display: none;
+}
+.switch-label {
+  width: 50px;
+  height: 26px;
+  background: #555;
+  border-radius: 50px;
+  position: relative;
+  transition: 0.3s;
+}
+.switch-label::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+.switch-input:checked + .switch-label {
+  background: var(--success-green);
+}
+.switch-input:checked + .switch-label::after {
+  left: 27px;
+}
+
+.slider-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: #ccc;
+  flex-grow: 1;
+  justify-content: flex-end;
+}
+input[type="range"] {
+  accent-color: var(--accent-gold);
+  cursor: pointer;
+}
+
+/* --- 3D STAGE & FLIPPER --- */
+.stage-container {
+  margin: 10px 0 30px 0;
+  text-align: center;
+  perspective: 1000px; /* Essential for 3D effect */
+  position: relative;
+  z-index: 5;
+}
+
+.mc-text {
+  min-height: 3rem; /* Height for ~2 lines of text */
+  margin-bottom: 20px;
+  color: var(--accent-glow);
+  font-style: italic;
+  font-weight: bold;
+  opacity: 0;
+  transition: opacity 0.5s;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 15px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.2;
+}
+.mc-text.visible {
+  opacity: 1;
+}
+
+/* The container for the spinning ball */
+.ball-container {
+  width: 180px;
+  height: 180px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* The flipper div holds Front and Back */
+.flipper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-style: preserve-3d;
+}
+
+/* Common styles for both faces */
+.flipper-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden; /* Hides the back of the element when rotated */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    inset -10px -10px 20px rgba(0, 0, 0, 0.3),
+    0 0 50px rgba(255, 215, 0, 0.2),
+    0 20px 40px rgba(0, 0, 0, 0.5);
+  border: 5px solid var(--accent-gold);
+  background: radial-gradient(circle at 30% 30%, #ffffff, #e0e0e0, #a0a0a0);
+}
+
+/* Front Face (The Number) */
+.front {
+  transform: rotateY(0deg); /* Starts facing front */
+  font-size: 5.5rem;
+  font-weight: 800;
+  color: #1a0b2e;
+}
+
+/* Back Face (The Question Mark) */
+.back {
+  transform: rotateY(180deg); /* Starts facing back */
+  font-size: 5.5rem;
+  color: #fff;
+  background: radial-gradient(circle at 30% 30%, #ff4757, #c0392b);
+  border-color: #fff;
+}
+
+/* Classes to control the flip state */
+.flipper.flipped {
+  transform: rotateY(180deg);
+}
+
+.shuffling {
+  animation: shake 0.1s infinite;
+}
+
+@keyframes shake {
+  0% {
+    transform: translate(1px, 1px) rotate(0deg);
+  }
+  25% {
+    transform: translate(-2px, 0px) rotate(1deg);
+  }
+  50% {
+    transform: translate(-1px, 2px) rotate(-1deg);
+  }
+  75% {
+    transform: translate(2px, 1px) rotate(0deg);
+  }
+  100% {
+    transform: translate(0px, -2px) rotate(-1deg);
+  }
+}
+
+/* --- Grid --- */
+.grid-wrapper {
+  background: var(--panel-color);
+  padding: 15px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.lotto-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 6px;
+  max-width: 800px;
+}
+.grid-ball {
+  width: 38px;
+  height: 38px;
+  background-color: var(--ball-dim);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.3);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
+  transition: all 0.5s ease;
+}
+.grid-ball.active {
+  background: radial-gradient(circle at 30% 30%, #ffd700, #ffaa00);
+  color: #1a0b2e;
+  font-weight: bold;
+  transform: scale(1.1);
+  box-shadow: 0 0 15px var(--accent-gold);
+  animation: glowPulse 2s infinite;
+}
+@keyframes glowPulse {
+  0% {
+    box-shadow: 0 0 5px var(--accent-gold);
+  }
+  50% {
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+  100% {
+    box-shadow: 0 0 5px var(--accent-gold);
+  }
+}
+
+.status-bar {
+  margin-top: 10px;
+  color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 800px;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 600px) {
+  .lotto-grid {
+    gap: 3px;
+  }
+  .grid-ball {
+    width: 28px;
+    height: 28px;
+    font-size: 0.75rem;
+  }
+  .ball-container {
+    width: 140px;
+    height: 140px;
+  }
+  .front,
+  .back {
+    font-size: 4rem;
+  }
+  .auto-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .slider-container {
+    width: 100%;
+  }
+}

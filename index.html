@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lô Tô 90 số và 100 số - Phiên bản Vui như Tết!</title>
+
+    <!-- Favicons & Manifest -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="manifest" href="site.webmanifest">
+
+    <!-- iOS support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Lô Tô 90">
+    <meta name="theme-color" content="#1a0b2e">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <header>
+        <h1>QUAY SỐ LÔ TÔ</h1>
+        <div class="subtitle">Hội Chợ Xuân - Vui Hơn, Hồi Hộp Hơn!</div>
+        <div class="game-mode-selector">
+            <button class="mode-btn active" onclick="setTotalNumbers(90)" id="mode-90">90 Số</button>
+            <button class="mode-btn" onclick="setTotalNumbers(100)" id="mode-100">100 Số</button>
+        </div>
+    </header>
+
+    <div class="controls-area">
+        <div class="main-buttons">
+            <button id="draw-btn" onclick="manualDraw()">
+                <span>🎲</span> Quay Số
+            </button>
+            <button id="reset-btn" onclick="resetGame()">
+                <span>↻</span> Chơi Lại
+            </button>
+            <button onclick="toggleSound()" style="background:rgba(255,255,255,0.1); padding: 12px;">
+                <span id="sound-icon">🔊</span>
+            </button>
+        </div>
+
+        <div class="auto-controls">
+            <label class="toggle-switch">
+                <input type="checkbox" class="switch-input" id="auto-toggle" onchange="toggleAutoPlay()">
+                <span class="switch-label"></span>
+                <span style="font-weight:bold; color:var(--accent-gold)">Tự Động Quay</span>
+            </label>
+
+            <div class="slider-container">
+                <span>Tốc độ: <span id="speed-val">8</span>s</span>
+                <input type="range" id="speed-range" min="5" max="15" value="8" step="1" oninput="updateSpeed(this.value)">
+            </div>
+        </div>
+    </div>
+
+    <div class="stage-container">
+        <div id="mc-display" class="mc-text">Chuẩn bị quay...</div>
+
+        <div class="ball-container">
+            <div class="flipper" id="flipper">
+                <div class="flipper-face front" id="ball-front">--</div>
+                <div class="flipper-face back">?</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid-wrapper">
+        <div class="lotto-grid" id="grid"></div>
+    </div>
+
+    <div class="status-bar">
+        <span>Đã quay: <b id="count" style="color:#fff">0</b> / <span id="total-display">90</span></span>
+        <span id="voice-status" style="font-size:0.8rem; opacity:0.7">Đang tìm giọng đọc...</span>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>
