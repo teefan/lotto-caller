@@ -1,4 +1,4 @@
-const APP_VERSION = "0.0.2";
+const APP_VERSION = "0.0.3";
 const CACHE_NAME = `lotto-v${APP_VERSION}`;
 const ASSETS = [
   "./",

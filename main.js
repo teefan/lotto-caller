@@ -1,57 +1,30 @@
 // --- Configuration ---
-const APP_VERSION = "0.0.2";
+const APP_VERSION = "0.0.3";
 let TOTAL_NUMBERS = 90;
 const SHUFFLE_DURATION_MS = 2500; // Slower for more suspense
 const SHUFFLE_SPEED_MS = 80; // Slightly slower flickers
 
 // --- MC Phrases (Vietnamese Lotto Style) ---
 const introPhrases = [
+  "Nào bà con ơi, tập trung lại nghe cho rõ nè!",
+  "Chuẩn bị tinh thần nha, con số tiếp theo xuất hiện đây!",
+  "Ai đang chờ số, giơ tay nào — tôi hô đây!",
+  "Nghe kỹ nè bà con, con số này chạy tới bây giờ!",
+  "Quay lẹ một xí... con số tiếp theo là...",
+  "Cầm vé kỹ nha, coi cho kỹ con số này!",
+  "Hô con cờ ra nè, coi coi con số nào!",
+  "Nào cô chú anh chị em, chuẩn bị ghi lại nào!",
   "Cờ ra con mấy, con mấy gì đây? Có ai chờ số này không?",
   "Số gì đây, số gì đây? Cầm cái vé trên tay, nhìn cho kỹ nha!",
   "Lặng lặng mà nghe, tôi kêu con cờ ra... Con số gì đây?",
   "Con số gì ra? Con số gì ra? Hồi hộp quá bà con ơi!",
   "Quay đều quay đều, tèng téng teng... Con số tiếp theo là...",
   "Xin mời bà con dò số, trúng thưởng là vui như Tết luôn!",
-  "Trăm năm Kiều vẫn là Kiều, số này mà trúng là tiêu hết tiền!",
   "Ai đang chờ số, tôi hô số! Chuẩn bị tinh thần chưa?",
   "Dò xem, dò xem! Một con số mang lại tài lộc...",
   "Bà con chú ý, con số định mệnh sắp xuất hiện!",
   "Vé đâu vé đâu? Chuẩn bị gạch tên con số này nè!",
-  "Gió đưa cành trúc la đà, ai mà trúng số chắc là đại gia!",
 ];
-
-const reactionSets = {
-  // Direct questions / crowd prompts
-  question: ["Có ai trúng chưa ạ? Ai trúng thì la lên cho bà con mừng coi!"],
-  // Praise / celebration
-  praise: ["Trời ơi số đẹp quá, không trúng nữa thì thôi luôn đó!", "Mừng cho ai sở hữu con số này, lộc về lộc về!"],
-  // Teasing / playful
-  tease: [
-    "Anh chị nào có số này chắc đang cười thầm trong bụng hả?",
-    "Kêu nãy giờ mới chịu ra, làm cả nhà chờ muốn xỉu!",
-  ],
-  // Suspense / delayed number comment
-  suspense: [
-    "Kinh khủng chưa, con số này nãy giờ trốn kỹ quá giờ mới ra!",
-    "Nín thở đi, con số này xuất hiện muộn mà chất lắm!",
-  ],
-  // Reminder / cautionary
-  caution: [
-    "Dò kỹ nha, đừng để lọt lưới con cá mập này nha quý vị!",
-    "Còn nhiều số lắm, ai chưa có thì bình tĩnh, vận may đang đến!",
-  ],
-  // Generic fallback pool
-  generic: [
-    "Có ai trúng chưa ạ? Ai trúng thì la lên cho bà con mừng coi!",
-    "Trời ơi số đẹp quá, không trúng nữa thì thôi luôn đó!",
-    "Anh chị nào có số này chắc đang cười thầm trong bụng hả?",
-    "Kinh khủng chưa, con số này nãy giờ trốn kỹ quá giờ mới ra!",
-    "Dò kỹ nha, đừng để lọt lưới con cá mập này nha quý vị!",
-    "Mừng cho ai sở hữu con số này, lộc về lộc về!",
-    "Còn nhiều số lắm, ai chưa có thì bình tĩnh, vận may đang đến!",
-    "Kêu nãy giờ mới chịu ra, làm cả nhà chờ muốn xỉu!",
-  ],
-};
 
 // Utility to pick a random element
 function pick(array) {
@@ -331,44 +304,36 @@ function chooseReaction(winner) {
   // Context-aware selections (use specific templates + category snippets)
   if (drawnCount === 1) {
     candidates.push(`Mở màn với con số ${call}! Bắt đầu rồi bà con ơi!`);
-    candidates.push(pick(reactionSets.question));
   }
 
   if (remaining === 0) {
     candidates.push(`Số cuối rồi: ${call}. Hết ván!`);
-    candidates.push(pick(reactionSets.praise));
   }
 
   if (winner < 10) {
     candidates.push(`Số nhỏ xinh: ${call}. Ai có thì giơ tay!`);
-    candidates.push(pick(reactionSets.tease));
   }
 
   if (units === 0) {
     candidates.push(`Số tròn chục: ${call}. Dễ nhớ quá!`);
-    candidates.push(pick(reactionSets.praise));
   }
 
-  if (tens === units && winner >= 11) {
+  // only treat as "số kép" for two-digit numbers (11-99)
+  if (winner >= 11 && winner <= 99 && tens === units) {
     candidates.push(`Số kép: ${call}! Ai có số kép là mừng rồi!`);
-    candidates.push(pick(reactionSets.praise));
   }
 
-  if (units === 5) {
+  // 'lăm' is used when there's a tens digit (e.g. 15, 25). For single-digit 5 we keep the normal reading.
+  if (units === 5 && winner >= 10) {
     candidates.push(`Có lăm nè: ${call}. May mắn lắm!`);
-    candidates.push(pick(reactionSets.praise));
   }
 
   if (remaining > 0 && remaining <= 5) {
     candidates.push(`Còn ${remaining} con nữa thôi, giữ vé kỹ nha!`);
-    candidates.push(pick(reactionSets.caution));
   }
 
   // If we have strong contextual candidates, return one
   if (candidates.length > 0) return pick(candidates);
-
-  // Occasional generic fallback that still references the called number
-  if (Math.random() < 0.5) return `${pick(reactionSets.generic)} — ${call}`;
 
   return null;
 }
