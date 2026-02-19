@@ -37,34 +37,60 @@ h1 {
   color: var(--accent-gold);
   font-size: 2.5rem;
 }
-.subtitle {
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.7);
-  font-style: italic;
-  margin-top: 5px;
-}
 
-/* --- Game Mode Selector --- */
-.game-mode-selector {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-top: 15px;
-}
-
-.mode-btn {
+/* Icon button for sound control */
+.icon-btn {
   background: rgba(255, 255, 255, 0.1);
-  color: white;
-  padding: 8px 16px;
-  font-size: 0.9rem;
-  min-width: 80px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+}
+.sound-btn {
+  min-width: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.mode-btn.active {
-  background: var(--accent-gold);
-  color: var(--bg-color);
-  box-shadow: 0 0 10px var(--accent-gold);
+/* Auto control label */
+.auto-label {
+  font-weight: bold;
+  color: var(--accent-gold);
+}
+
+/* Slider label */
+.slider-label {
+  color: #ccc;
+  font-size: 0.95rem;
+}
+
+/* Accessibility helper */
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Status bar classes */
+.count-value {
+  color: #fff;
+}
+.voice-status {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+.app-version {
+  margin-left: 10px;
+  font-size: 0.85rem;
+  opacity: 0.8;
 }
 
 /* --- Controls --- */
@@ -198,13 +224,13 @@ input[type="range"] {
 .stage-container {
   margin: 10px 0 30px 0;
   text-align: center;
-  perspective: 1000px; /* Essential for 3D effect */
+  perspective: 1000px;
   position: relative;
   z-index: 5;
 }
 
 .mc-text {
-  min-height: 3rem; /* Height for ~2 lines of text */
+  min-height: 3rem;
   margin-bottom: 20px;
   color: var(--accent-glow);
   font-style: italic;
@@ -226,7 +252,6 @@ input[type="range"] {
   opacity: 1;
 }
 
-/* The container for the spinning ball */
 .ball-container {
   width: 180px;
   height: 180px;
@@ -234,7 +259,6 @@ input[type="range"] {
   position: relative;
 }
 
-/* The flipper div holds Front and Back */
 .flipper {
   width: 100%;
   height: 100%;
@@ -243,12 +267,11 @@ input[type="range"] {
   transform-style: preserve-3d;
 }
 
-/* Common styles for both faces */
 .flipper-face {
   position: absolute;
   width: 100%;
   height: 100%;
-  backface-visibility: hidden; /* Hides the back of the element when rotated */
+  backface-visibility: hidden;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -261,24 +284,21 @@ input[type="range"] {
   background: radial-gradient(circle at 30% 30%, #ffffff, #e0e0e0, #a0a0a0);
 }
 
-/* Front Face (The Number) */
 .front {
-  transform: rotateY(0deg); /* Starts facing front */
+  transform: rotateY(0deg);
   font-size: 5.5rem;
   font-weight: 800;
   color: #1a0b2e;
 }
 
-/* Back Face (The Question Mark) */
 .back {
-  transform: rotateY(180deg); /* Starts facing back */
+  transform: rotateY(180deg);
   font-size: 5.5rem;
   color: #fff;
   background: radial-gradient(circle at 30% 30%, #ff4757, #c0392b);
   border-color: #fff;
 }
 
-/* Classes to control the flip state */
 .flipper.flipped {
   transform: rotateY(180deg);
 }
