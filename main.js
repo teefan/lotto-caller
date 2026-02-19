@@ -97,7 +97,7 @@ function speakHappy(text, callback) {
   if (selectedVoice) utterance.voice = selectedVoice;
 
   // HAPPY SETTINGS:
-  utterance.pitch = 1.4;
+  utterance.pitch = 1.1;
   utterance.rate = 1.0;
   utterance.volume = 1.0;
 
@@ -144,16 +144,53 @@ function numberToCall(number) {
 }
 
 // Special function to call the number in "Lotto Style"
+// Updated: add a suspense "teaser" for two-digit numbers (1x => "Số mười... mấy đây?",
+//  2x-9x => "Số hai... mươi mấy đây?") before announcing the full number.
 function callNumber(number, callback) {
-  if (!isSoundOn || !window.speechSynthesis) {
-    if (callback) setTimeout(callback, 1200); // Artificial delay to simulate suspense when muted
+  const call = numberToCall(number);
+
+  // Helper: final spoken line used for both single- and two-digit announcements
+  const finalText = number < 10 ? `Con số ${call}, là con số ${call}` : `Số ${call}, là con số ${call}!`;
+
+  // For two-digit numbers (10-99) we first do a short "teaser" then the full call
+  if (number >= 10 && number <= 99) {
+    const tens = Math.floor(number / 10);
+    const tensWords = ["không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"];
+    const teaser = tens === 1 ? "Số mười... mấy đây?" : `Số ${tensWords[tens]}... mươi mấy đây?`;
+
+    // Update visual MC text immediately
+    if (mcDisplayEl) mcDisplayEl.textContent = teaser;
+
+    // When sound is disabled, simulate the same timing and text flow
+    if (!isSoundOn || !window.speechSynthesis) {
+      setTimeout(() => {
+        if (mcDisplayEl) mcDisplayEl.textContent = finalText;
+        setTimeout(() => {
+          if (callback) callback();
+        }, 900);
+      }, 800);
+      return;
+    }
+
+    // With TTS: speak teaser, short pause, then speak the final call
+    speakHappy(teaser, () => {
+      setTimeout(() => {
+        if (mcDisplayEl) mcDisplayEl.textContent = finalText;
+        speakHappy(finalText, callback);
+      }, 450);
+    });
+
     return;
   }
 
-  const call = numberToCall(number);
-  const text = number < 10 ? `Con số ${call}, là con số ${call}` : `Số ${call}, là con số ${call}!`;
+  // Default behavior for single-digit or out-of-range numbers
+  if (mcDisplayEl) mcDisplayEl.textContent = finalText;
+  if (!isSoundOn || !window.speechSynthesis) {
+    if (callback) setTimeout(callback, 1200);
+    return;
+  }
 
-  speakHappy(text, callback);
+  speakHappy(finalText, callback);
 }
 
 // --- Game Logic ---
