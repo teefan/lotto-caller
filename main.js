@@ -28,6 +28,52 @@ const introPhrases = [
   "Bà con đợi số mấy, để em kêu cho.",
 ];
 
+// --- Tịch Số Đề (Mảng 40 phần tử) ---
+// Sử dụng phép chia lấy dư (number % 40) để tìm tịch.
+// Lưu ý: 40 và 80 chia hết cho 40 nên dư 0 -> index 0 là Ông Táo.
+const TICH_DE = [
+  "Ông Táo", // 0 (40, 80)
+  "con cá trắng", // 1 (1, 41, 81)
+  "con ốc", // 2 (2, 42, 82)
+  "con vịt", // 3 (3, 43, 83) - Đổi thành vịt cho vui tươi
+  "con công", // 4 (4, 44, 84)
+  "con giun", // 5 (5, 45, 85)
+  "con cọp", // 6 (6, 46, 86)
+  "con heo", // 7 (7, 47, 87)
+  "con thỏ", // 8 (8, 48, 88)
+  "con trâu", // 9 (9, 49, 89)
+  "con rồng nước", // 10 (10, 50, 90)
+  "con chó", // 11
+  "con ngựa", // 12
+  "con voi", // 13
+  "con mèo nhà", // 14
+  "con chuột", // 15
+  "con ong", // 16
+  "con chim hạc", // 17
+  "con mèo rừng", // 18
+  "con bướm", // 19
+  "con rết", // 20
+  "cô Thúy Kiều", // 21
+  "chim bồ câu", // 22
+  "con khỉ", // 23
+  "con ếch", // 24
+  "chim diều hâu", // 25
+  "con rồng bay", // 26
+  "con rùa", // 27
+  "con gà", // 28
+  "con lươn", // 29
+  "con cá lóc", // 30
+  "con tôm", // 31
+  "con rắn", // 32
+  "con nhện", // 33
+  "con nai", // 34
+  "con dê", // 35
+  "Bà Vải", // 36
+  "Ông Trời", // 37
+  "Ông Địa", // 38
+  "Thần Tài", // 39
+];
+
 // (traditional number-call phrases removed — MC now announces the numeric call once)
 
 // Utility to pick a random element
@@ -143,53 +189,50 @@ function numberToCall(number) {
   return `${tensWord} mươi ${unitsWord}`;
 }
 
-// Call number in traditional Lotto style:
-// 1. Tease the tens digit
+// Call number in traditional Lotto style with Tịch Số Đề:
+// 1. Tease the animal + tens digit
 // 2. Pause
-// 3. Announce full number + traditional phrase
+// 3. Announce full number
 function callNumber(number, callback) {
   const call = numberToCall(number);
+  const tich = TICH_DE[number % 40]; // Lấy ra tên con vật/nhân vật
 
-  // Build the numeric announcement (single announcement)
+  // Build the numeric announcement
   const announcement =
     number < 10 ? `Đó là... con số ${call}, là con số ${call}` : `Đó là... số ${call}, là con số ${call}!`;
   const finalText = announcement;
 
-  if (number >= 10 && number <= 99) {
+  // Xây dựng câu gợi ý (Teaser) kết hợp Tịch và số hàng chục
+  let teaser = "";
+  if (number < 10) {
+    teaser = `Cờ ra ${tich}... là số mấy đây?`;
+  } else {
     const tens = Math.floor(number / 10);
     const tensWords = ["không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"];
-    const teaser = tens === 1 ? "Số mười... mấy đây?" : `Số ${tensWords[tens]}... mươi mấy đây?`;
-
-    updateMcDisplay(teaser);
-
-    if (!isSoundOn || !window.speechSynthesis) {
-      setTimeout(() => {
-        updateMcDisplay(finalText);
-        setTimeout(() => {
-          if (callback) callback();
-        }, TIMING.MUTE_FALLBACK_SHORT_MS);
-      }, TIMING.MUTE_TEASER_PAUSE_MS);
-      return;
-    }
-
-    speakHappy(teaser, () => {
-      setTimeout(() => {
-        updateMcDisplay(finalText);
-        speakHappy(finalText, callback);
-      }, TIMING.TEASER_PAUSE_MS);
-    });
-    return;
+    const chuc = tens === 1 ? "Số mười" : `Số ${tensWords[tens]} mươi`;
+    teaser = `Cờ ra ${tich}... ${chuc}... mấy đây?`;
   }
 
-  // Single-digit numbers
-  updateMcDisplay(finalText);
+  updateMcDisplay(teaser);
 
+  // Xử lý khi tắt âm thanh hoặc lỗi TTS
   if (!isSoundOn || !window.speechSynthesis) {
-    if (callback) setTimeout(callback, TIMING.MUTE_FALLBACK_LONG_MS);
+    setTimeout(() => {
+      updateMcDisplay(finalText);
+      setTimeout(() => {
+        if (callback) callback();
+      }, TIMING.MUTE_FALLBACK_SHORT_MS);
+    }, TIMING.MUTE_TEASER_PAUSE_MS);
     return;
   }
 
-  speakHappy(finalText, callback);
+  // Đọc câu gợi ý trước, đợi một nhịp (TEASER_PAUSE_MS) rồi mới công bố số
+  speakHappy(teaser, () => {
+    setTimeout(() => {
+      updateMcDisplay(finalText);
+      speakHappy(finalText, callback);
+    }, TIMING.TEASER_PAUSE_MS);
+  });
 }
 
 // --- Game Logic ---
@@ -322,6 +365,53 @@ function chooseReaction(winner, remainingCount) {
 
   const candidates = [];
 
+  // --- 1. PHẢN ỨNG THEO CÁC SỐ ĐẶC BIỆT (VĂN HÓA / PHONG THỦY) ---
+  switch (winner) {
+    case 13:
+      candidates.push("Số mười ba... Tây kiêng ta không kiêng!");
+      break;
+    case 33:
+      candidates.push("Ba mươi ba... Bắt được con ba ba!");
+      break;
+    case 38:
+      candidates.push("Ba mươi tám... Ông Địa nhỏ tới chơi!");
+      break;
+    case 39:
+      candidates.push("Ba mươi chín... Thần Tài nhỏ gõ cửa!");
+      break;
+    case 44:
+      candidates.push("Bốn mươi bốn... Hai cây búa chà bá!");
+      break;
+    case 49:
+      candidates.push("Bốn mươi chín... Bước qua năm tuổi nha!");
+      break;
+    case 53:
+      candidates.push("Năm mươi ba... Xui xẻo bay xa!");
+      break;
+    case 68:
+      candidates.push("Sáu mươi tám... Lộc phát, lộc phát!");
+      break;
+    case 78:
+      candidates.push("Bảy mươi tám... Ông Địa lớn hiển linh!");
+      break;
+    case 79:
+      candidates.push("Bảy mươi chín... Thần Tài lớn rước lộc vào nhà!");
+      break;
+    case 83:
+      candidates.push("Tám mươi ba... Phát tài, phát tài!");
+      break;
+    case 86:
+      candidates.push("Tám mươi sáu... Phát lộc, phát lộc!");
+      break;
+    case 88:
+      candidates.push("Tám mươi tám... Đại phát đại lợi!");
+      break;
+    case 99:
+      candidates.push("Chín mươi chín... Trường trường cửu cửu!");
+      break;
+  }
+
+  // --- 2. LOGIC TRẠNG THÁI GAME ---
   if (drawnCount === 1) {
     candidates.push(`Mở màn ${call}!`);
   }
@@ -338,20 +428,27 @@ function chooseReaction(winner, remainingCount) {
     candidates.push(`Số tròn chục ${call}.`);
   }
 
-  // Số kép: chỉ áp dụng cho số hai chữ số (11-99)
+  // Số kép (11, 22, 55, 77...)
   if (winner >= 11 && winner <= 99 && tens === units) {
     candidates.push(`Số kép ${call}!`);
+    // Thêm các hình tượng dân gian cho số kép
+    if (winner === 11) candidates.push("Mười một... Giống hai cái cẳng!");
+    if (winner === 22) candidates.push("Hai mươi hai... Một cặp vịt bầu!");
+    if (winner === 55) candidates.push("Năm mươi lăm... Hai cái còng số tám!");
+    if (winner === 77) candidates.push("Bảy mươi bảy... Hai cây cuốc chim!");
   }
 
-  if (units === 5 && winner >= 10) {
+  if (units === 5 && winner >= 10 && winner !== 55) {
     candidates.push(`Có lăm nè ${call}.`);
   }
 
   if (remainingCount > 0 && remainingCount <= 5) {
-    candidates.push(`Còn ${remainingCount} con nữa thôi!`);
+    candidates.push(`Trời ơi, còn ${remainingCount} con nữa thôi!`);
   }
 
+  // Chọn ngẫu nhiên một câu bình luận trong danh sách ứng viên
   if (candidates.length > 0) return pick(candidates);
+
   return null;
 }
 
